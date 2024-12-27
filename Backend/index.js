@@ -21,7 +21,11 @@ let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+    origin: 'https://travel-diaries-frontend-three.vercel.app', // Replace with your frontend's URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    credentials: true, // If using cookies or credentials
+  }))
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true
