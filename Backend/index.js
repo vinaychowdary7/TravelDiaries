@@ -10,6 +10,7 @@ const serviceAccountKey=require('./traveldiaries-blog-firebase-adminsdk-z4c7e-c9
 
 const User = require('./Schema/User.js');
 const Trip = require('./Schema/Trip.js');
+const Notification = require('./Schema/Notification.js');
 
 const app = express();
 const PORT = 3000;
@@ -21,7 +22,10 @@ let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow only this origin
+    credentials: true, // Allow cookies and credentials
+  }));
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true
@@ -186,6 +190,40 @@ app.post("/google-auth",async(req,res)=>{
     })
 })
 
+app.post('/change-password',verifyJWT,(req,res)=>{
+    let {currentPassword,newPassword}=req.body;
+    if(!passwordRegex.test(currentPassword)||!passwordRegex.test(newPassword)){
+        return res.status(403).json({error:"Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase"})
+      }
+    User.findOne({_id:req.user})
+    .then((user)=>{
+        if(user.google_auth){
+            return res.status(403).json({error:"You can't change account's password because you logged in through google"})
+        }
+        bcrypt.compare(currentPassword,user.personal_info.password,(err,result)=>{
+            if(err){
+                return res.status(500).json({error:"Some error while changing the password, please try again later"})
+            }
+            if(!result){
+                return res.status(403).json({error:"Incorrect current password"})
+            }
+            bcrypt.hash(newPassword,10,(err,hashed_password)=>{
+                User.findOneAndUpdate({_id:req.user},{"personal_info.password":hashed_password})
+                .then((u)=>{
+                    return res.status(200).json({status:"Password changed"})
+                })
+                .catch(err=>{
+                    return res.status(500).json({error:"Some error occured while saving new password , please tryagain later "})
+                })
+            })
+        })
+    })
+    .catch(err=>{
+        return res.status(500).json({error:"User Not Found"})
+    })
+    
+})
+
 app.post('/latest-trips',(req,res)=>{
     let{page}=req.body;
     const maxLimit=10;
@@ -294,10 +332,10 @@ app.post('/search-users',(req,res)=>{
 })
 
 app.post('/search-trips',(req,res)=>{
-    const { location,page,query,author } = req.body;
+    const { location,page,query,author,eliminate_trip } = req.body;
     let findQuery;
     if(location){
-        findQuery={ location: new RegExp(location,'i') };
+        findQuery={ location: new RegExp(location,'i') ,trip_id:{$ne:eliminate_trip}};
     }
     else if(query){
         findQuery={ title: new RegExp(query,'i') };
@@ -356,8 +394,8 @@ app.post('/get-profile',(req,res)=>{
 })
 
 app.post('/get-trip',(req,res)=>{
-    const {trip_id}=req.body;
-    const incrementVal=1;
+    const {trip_id,mode}=req.body;
+    const incrementVal=mode=='edit'?0:1;
     Trip.findOneAndUpdate({trip_id},{$inc:{"activity.total_reads":incrementVal}})
     .populate("author","personal_info.fullname personal_info.username personal_info.profile_img")
     .select("title location duration budget mustvisit content stay publishedAt trip_id activity")
@@ -371,6 +409,53 @@ app.post('/get-trip',(req,res)=>{
     .catch(err=>{
         return res.status(500).json({error: err.message})
     })
+})
+
+app.post("/isLikedByUser",verifyJWT,(req,res)=>{
+    let user_id=req.user;
+    let {_id}=req.body;
+    Notification.exists({user:user_id,type:'like',trip:_id})
+    .then(result=>{
+        return res.status(200).json({result})
+    })
+    .catch(err=>{
+        return res.status(500).json({error:err.message})
+    })
+
+})
+
+app.post("/liked-trip",verifyJWT,(req,res)=>{
+
+    let user_id=req.user;
+
+    let {_id,isLikedByUser}=req.body;
+
+    let incrementVal=!isLikedByUser?1:-1;
+
+    Trip.findOneAndUpdate({_id},{$inc:{"activity.total_likes":incrementVal}})
+    .then(trip=>{
+        if(!isLikedByUser){
+            let like=new Notification({
+                type:"like",
+                trip:_id,
+                notification_for:trip.author,
+                user:user_id
+            })
+            like.save().then(notification=>{
+                return res.status(200).json({liked_by_user:true})
+            })
+        }
+        else{
+            Notification.findOneAndDelete({user:user_id,trip:_id,type:'like'})
+            .then(data=>{
+                return res.status(200).json({isLikedByUser:false})
+            })
+            .catch(err=>{
+                return res.status(500).json({error:err.message})
+            })
+        }
+    })
+
 })
 
 app.listen(PORT, () => {

@@ -1,6 +1,5 @@
 import Embed from '@editorjs/embed'
 import List from '@editorjs/list'
-import Image from '@editorjs/image'
 import Header from '@editorjs/header'
 import Quote from '@editorjs/quote'
 import Marker from '@editorjs/marker'
@@ -14,26 +13,6 @@ export const tools ={
         class:List,
         inlineToolbar:true
     },
-    image: {
-        class: Image,
-        config: {
-          uploader: {
-            uploadByFile(file) {
-              return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  resolve({
-                    success: 1,
-                    file: { url: reader.result },
-                  });
-                };
-                reader.onerror = () => reject('Failed to upload image');
-                reader.readAsDataURL(file);
-              });
-            },
-          },
-        },
-      },
     header:{
         class:Header,
         config:{

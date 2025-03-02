@@ -1,10 +1,13 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import AnimationWrapper from '../Common/AnimationWrapper';
 import Loader from './Loader';
 import { getDate } from '../Common/Date';
 import BlogInteration from './BlogInteration';
+import TripPost from './TripPost';
+import TripContent from './TripContent';
+import TripStayAndMustVisit from './TripStayAndMustVisit';
 
 export const TripStructure= {
     title:'',
@@ -20,16 +23,27 @@ export const TripStructure= {
     publishedAt:''
 }
 
+export const TripContext =createContext({});
+
 const TripPage = () => {
     const {trip_id} = useParams();
     const [trip,setTrip]=useState(TripStructure);
     const [loading,setLoading]=useState(true);
+    const [similarTrips,setSimilarTrips]=useState(null);
+    const [isLikedByUser,setIsLikedByUser]=useState(false);
 
     const {title,location,duration,budget,mustvisit,stay,content,author:{personal_info:{fullname, username : author_username,profile_img}},publishedAt}=trip;
+
     const fetchTrip=()=>{
         axios.post(import.meta.env.VITE_BACKEND_SERVER_DOMAIN+'get-trip',{trip_id})
         .then(({data:{trip}})=>{
+
             setTrip(trip);
+
+            axios.post(import.meta.env.VITE_BACKEND_SERVER_DOMAIN+"search-trips",{location:trip.location,limit:6,eliminate_trip:trip_id})
+            .then(({data})=>{
+                setSimilarTrips(data.trips);
+            })
             setLoading(false);
         })
         .catch(err=>{
@@ -37,12 +51,20 @@ const TripPage = () => {
         })
     }
     useEffect(() => {
+        resetStates();
         fetchTrip();
-    }, [])
+    }, [trip_id])
+
+    const resetStates=()=>{
+        setTrip(TripStructure);
+        setSimilarTrips(null);
+        setLoading(true);
+    }
   return (
     <AnimationWrapper>
         {
             loading?<Loader/>:
+            <TripContext.Provider value={{trip,setTrip,isLikedByUser,setIsLikedByUser}}>
             <div className='max-w-[900px] center py-10 max-lg:px-[5vw]'>
                 <div className='mt-12'>
                     <div
@@ -66,7 +88,34 @@ const TripPage = () => {
                     </div>
                 </div>
                 <BlogInteration />
+                <div className='my-12 font-gelasio trip-page-content'>
+                    {
+                        content[0].blocks.map((block,i)=>{
+                            return <div key={i} className='my-4 md:my-8'>
+                                <TripContent block={block}/>
+                            </div>
+                        })
+                    }
+                    <TripStayAndMustVisit stay={stay} mustvisit={mustvisit}/>
+                </div>
+                <BlogInteration />
+                {
+                    similarTrips!=null&&similarTrips.length?
+                    <>
+                    <h1 className='text-2xl mt-14 mb-10 font-medium'>Similar Destinations</h1>
+                    {
+                        similarTrips.map((trip,i)=>{
+                            let{author:{personal_info}}=trip;
+
+                            return <AnimationWrapper key={i} transition={{duration:1 ,delay:i*0.06}}>
+                                <TripPost tripData={trip} author={personal_info}/>
+                            </AnimationWrapper>
+                        })
+                    }
+                    </>:""
+                }
             </div>
+            </TripContext.Provider>
         }
     </AnimationWrapper>
   )

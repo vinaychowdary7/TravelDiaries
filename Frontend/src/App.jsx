@@ -9,6 +9,9 @@ import SearchPage from './Pages/SearchPage'
 import NotFound from './Components/NotFound'
 import Profile from './Pages/Profile'
 import TripPage from './Components/TripPage'
+import SideNav from './Components/SideNav'
+import ChangePassword from './Components/ChangePassword'
+import EditProfile from './Components/EditProfile'
 
 const UserContext = createContext({});
 
@@ -33,6 +36,10 @@ const App = () => {
         <Route path='/editor' element={<Editor/>}/>
         <Route path='/' element={<Navbar/>} >
         <Route index element={<HomePage/>}/>
+        <Route path='settings' element={<SideNav/>}>
+          <Route path='edit-profile' element={<EditProfile/>}/>
+          <Route path='change-password' element={<ChangePassword/>}/>
+        </Route>
         <Route path='signin' element={<UserAuthForm type="signin"/>} />
         <Route path='signup' element={<UserAuthForm type="signup"/>} />
         <Route path='search/:query' element={<SearchPage/>}/>

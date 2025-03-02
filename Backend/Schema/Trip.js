@@ -41,23 +41,7 @@ const tripSchema = mongoose.Schema({
             type: Number,
             default: 0
         },
-        total_comments: {
-            type: Number,
-            default: 0
-        },
-        total_reads: {
-            type: Number,
-            default: 0
-        },
-        total_parent_comments: {
-            type: Number,
-            default: 0
-        },
     },
-    comments: {
-        type: [Schema.Types.ObjectId],
-        ref: 'comments'
-    }
 
 }, 
 { 
