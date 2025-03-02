@@ -22,10 +22,7 @@ let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
 app.use(express.json());
-app.use(cors({
-    origin: 'http://localhost:5173', // Allow only this origin
-    credentials: true, // Allow cookies and credentials
-  }));
+app.use(cors())
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true
