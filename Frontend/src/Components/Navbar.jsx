@@ -1,12 +1,14 @@
 import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import logo from '../assets/travel.png';
-import { UserContext } from '../App';
+import { ThemeContext, UserContext } from '../App';
 import UserNavigation from './UserNavigation';
+import { storeInSession } from '../Common/Session';
 
 const Navbar = () => {
   const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
   const [userNavPanel, setUserNavPanel] = useState(false);
+  let {theme,setTheme}=useContext(ThemeContext);
 
   const navigate = useNavigate();
 
@@ -27,6 +29,12 @@ const Navbar = () => {
     if(e.keyCode==13 && query.length){
       navigate(`/search/${query}`)
     }
+  }
+  const changeTheme = () =>{
+    let newTheme = theme == "light" ? "dark" :"light"; 
+    setTheme(newTheme);
+    document.body.setAttribute("data-theme",newTheme);
+    storeInSession("theme",newTheme);
   }
 
   useEffect(() => {
@@ -73,13 +81,12 @@ const Navbar = () => {
             <p>Write</p>
           </Link>
 
+          <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/20" onClick={changeTheme}>
+          <i className="fi fi-sr-moon-stars"></i>
+          </button>
+
           {access_token ? (
             <>
-              <Link to="/dashboard/notification">
-                <button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/20">
-                  <i className="fi fi-rr-bell text-2xl block mt-1"></i>
-                </button>
-              </Link>
               <div className="relative" ref={userNavRef}>
                 <button className="w-12 h-12 mt-1" onClick={handleUserNavPanel}>
                   <img

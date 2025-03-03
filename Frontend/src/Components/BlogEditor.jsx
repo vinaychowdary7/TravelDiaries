@@ -118,7 +118,7 @@ const BlogEditor = () => {
                     <textarea
                             defaultValue={title}
                             placeholder='Title of Travel Experience'
-                            className='text-4xl font-medium w-full min-h-[40px] outline-none resize-none mt-10 leading-snug placeholder:opacity-40'
+                            className='text-4xl font-medium w-full min-h-[40px] outline-none resize-none mt-10 leading-snug placeholder:opacity-40 bg-white'
                             onKeyDown={handleKeyDown}
                             onChange={handleTitleChange}
                             >
@@ -127,7 +127,7 @@ const BlogEditor = () => {
                         <textarea
                             defaultValue={location}
                             placeholder='Trip Place'
-                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40'
+                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40 bg-white'
                             onKeyDown={handleKeyDown}
                             onChange={handleLocationChange}
                             >
@@ -136,7 +136,7 @@ const BlogEditor = () => {
                         <textarea
                             defaultValue={budget}
                             placeholder='Trip Budget'
-                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40'
+                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40 bg-white'
                             onKeyDown={handleKeyDown}
                             onChange={handleBudgetChange}
                             >
@@ -145,7 +145,7 @@ const BlogEditor = () => {
                         <textarea
                             defaultValue={duration}
                             placeholder='Trip Duration'
-                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40'
+                            className='text-2xl font-medium w-full min-h-[30px] outline-none resize-none mt-7 leading-snug placeholder:opacity-40 bg-white'
                             onKeyDown={handleKeyDown}
                             onChange={handleDurationChange}
                             >

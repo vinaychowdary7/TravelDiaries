@@ -12,12 +12,13 @@ const InputBox = ({name,type,id,value,placeholder,icon , disable=false}) => {
             placeholder={placeholder}
             defaultValue={value}
             id={id}
+            disabled={disable}
             className='input-box'
         />
         <i className={"fi "+icon+ " input-icon"}></i>
         {
             type=="password"?
-            <i class={"fi fi-rs"+(!passwordVidible?"-crossed":"")+"-eye input-icon left-[auto] right-4 cursor-pointer"} onClick={()=>setPasswordVidible(currentVal=>!currentVal)}></i>
+            <i className={"fi fi-rs"+(!passwordVidible?"-crossed":"")+"-eye input-icon left-[auto] right-4 cursor-pointer"} onClick={()=>setPasswordVidible(currentVal=>!currentVal)}></i>
             :""
         }
     </div>

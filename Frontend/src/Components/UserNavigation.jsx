@@ -28,10 +28,6 @@ const UserNavigation = () => {
                 Profile
             </Link>
 
-            <Link to="/dashboard/trips"className='link pl-8 py-4'>
-                Dashboard
-            </Link>
-
             <Link to="/settings/edit-profile"className='link pl-8 py-4'>
                 Settings
             </Link>
